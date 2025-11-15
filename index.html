@@ -326,7 +326,18 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            // Comprobar si la configuración está presente
+            if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                throw new Error("La variable de configuración de Firebase (__firebase_config) no está presente. Esta aplicación debe ejecutarse en su entorno específico.");
+            }
+
+            const firebaseConfig = JSON.parse(__firebase_config);
+            
+            // Comprobación básica de que la configuración es válida
+            if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+                 throw new Error("La configuración de Firebase es inválida o incompleta.");
+            }
+            
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
@@ -339,7 +350,13 @@
             }
         } catch (error) {
             console.error("Error inicializando Firebase:", error);
-            document.body.innerHTML = '<div class="text-red-500 text-center p-8">Error de configuración. La aplicación no puede iniciarse.</div>';
+            // Mostrar un error más específico
+            document.body.innerHTML = `<div class="text-red-500 text-center p-8">
+                <h1 class="font-bold text-xl mb-2">Error de Configuración</h1>
+                <p>La aplicación no puede iniciarse.</p>
+                <p class="text-sm text-gray-600 mt-4">(${error.message || 'Error desconocido'})</p>
+                <p class="text-sm text-gray-600 mt-2">Asegúrate de que la aplicación se está ejecutando en el entorno correcto que proporciona la configuración de Firebase.</p>
+                </div>`;
             return;
         }
         
