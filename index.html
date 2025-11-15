@@ -231,6 +231,7 @@
 
                 <!-- Fila 3: Desglose Clases y Contexto -->
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <!-- BLOQUE HTML RE-AÑADIDO -->
                     <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
                         <h3 class="text-xl font-semibold mb-4 text-slate-700">Desglose por Etapas</h3>
                         
@@ -275,9 +276,11 @@
                             
                         </div>
                     </div>
+                    <!-- FIN BLOQUE HTML RE-AÑADIDO -->
+
                     <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                        <h3 class="text-xl font-semibold mb-4 text-slate-700">Contexto de Emociones Negativas</h3>
-                        <p class="text-sm text-slate-500 -mt-2 mb-4">Muestra el origen de las emociones negativas y neutrales.</p>
+                        <h3 class="text-xl font-semibold mb-4 text-slate-700">Contexto de Emociones</h3>
+                        <p class="text-sm text-slate-500 -mt-2 mb-4">Muestra el origen de todas las emociones registradas.</p>
                         <div class="min-h-[300px]">
                              <canvas id="context-chart"></canvas>
                         </div>
@@ -311,6 +314,7 @@
         </div>
     </div>
 
+<!-- CORRECCIÓN: Faltaba el signo = en type="module" -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -374,12 +378,11 @@
             { name: 'Aburrimiento', color: 'bg-gray-500', emoji: '😑', type: 'neutral' },
             { name: 'Envidia', color: 'bg-pink-500', emoji: '😒', type: 'negative' },
             { name: 'Vergüenza', color: 'bg-indigo-500', emoji: '😳', type: 'negative' },
-            { name: 'Calma', color: 'bg-cyan-500', emoji: '😌', type: 'positive' } // <-- AÑADIDO AQUÍ
+            { name: 'Calma', color: 'bg-cyan-500', emoji: '😌', type: 'positive' }
         ];
         
         const esoExtraEmotions = [
             { name: 'Frustración', color: 'bg-red-800', emoji: '😤', type: 'negative' },
-            // { name: 'Calma', color: 'bg-cyan-500', emoji: '😌', type: 'positive' }, // <-- MOVIDO A baseEmotions
             { name: 'Orgullo', color: 'bg-yellow-600', emoji: '😎', type: 'positive' },
             { name: 'Decepción', color: 'bg-blue-800', emoji: '😞', type: 'negative' },
             { name: 'Inseguridad', color: 'bg-purple-400', emoji: '😖', type: 'negative' },
@@ -393,6 +396,15 @@
 
         // Lista maestra para el dashboard
         const allEmotions = [...baseEmotions, ...esoExtraEmotions.filter(e => !baseEmotions.find(b => b.name === e.name))];
+        
+        // NUEVO: Mapa de colores hexadecimales para Chart.js
+        const emotionHexColors = {
+            'Alegría': '#FBBF24', 'Tristeza': '#3B82F6', 'Ira': '#DC2626', 'Miedo': '#9333EA',
+            'Asco': '#16A34A', 'Ansiedad': '#F97316', 'Aburrimiento': '#6B7280', 'Envidia': '#EC4899',
+            'Vergüenza': '#6366F1', 'Calma': '#06B6D4', 'Frustración': '#991B1B', 'Orgullo': '#D97706',
+            'Decepción': '#1E40AF', 'Inseguridad': '#C084FC', 'Distante': '#64748B', 'Rechazado': '#3730A3',
+            'Amenazado': '#6B21A8', 'Agresivo': '#7F1D1D', 'Culpable': '#374151', 'Deprimido': '#1E3A8A'
+        };
         
         const contexts_general = [
             { name: 'Clase / Tareas', icon: '📚', color: 'bg-blue-100 text-blue-800' },
@@ -418,14 +430,6 @@
             'Clase / Tareas': '#3B82F6', 'Yo mismo/a': '#F59E0B', 'Exámenes / Notas': '#DC2626', 'Redes Sociales': '#06B6D4', 
             'Mi Imagen / Autoestima': '#F59E0B', 'El Futuro': '#F97316', 'Amigos / Compañeros': '#10B981', 'Familia / Casa': '#8B5CF6', 'No lo sé': '#6B7280'
         };
-        
-        const emotionColorMap = {
-            'Alegría': '#FBBF24', 'Tristeza': '#3B82F6', 'Ira': '#DC2626', 'Miedo': '#9333EA', 'Asco': '#16A34A',
-            'Ansiedad': '#F97316', 'Aburrimiento': '#6B7280', 'Envidia': '#EC4899', 'Vergüenza': '#6366F1', 'Calma': '#06B6D4',
-            'Frustración': '#991B1B', 'Orgullo': '#D97706', 'Decepción': '#1E40AF', 'Inseguridad': '#C084FC',
-            'Distante': '#64748B', 'Rechazado': '#3730A3', 'Amenazado': '#6B21A8', 'Agresivo': '#7F1D1D',
-            'Culpable': '#374151', 'Deprimido': '#1E3A8A'
-        };
 
         // --- ELEMENTOS DEL DOM ---
         const views = {
@@ -442,11 +446,6 @@
         
         const dateStartFilter = document.getElementById('date-start-filter');
         const dateEndFilter = document.getElementById('date-end-filter');
-        // const aiAnalysisBtn = document.getElementById('ai-analysis-btn'); // ELIMINADO
-        // const aiResultContainer = document.getElementById('ai-result-container'); // ELIMINADO
-        // const aiResultTitle = document.getElementById('ai-result-title'); // ELIMINADO
-        // const aiResultText = document.getElementById('ai-result-text'); // ELIMINADO
-        // const aiLoader = document.getElementById('ai-loader'); // ELIMINADO
         const confirmationModal = document.getElementById('confirmation-modal');
         const confirmResetBtn = document.getElementById('confirm-reset-btn');
         const confirmationMessage = document.getElementById('confirmation-message');
@@ -529,7 +528,7 @@
             });
         };
         
-        // --- BLOQUE DE FUNCIONES RESTAURADO ---
+        // --- BLOQUE DE FUNCIONES ---
         
         const handleClassSelection = (cls) => {
             state.selectedClass = cls;
@@ -594,14 +593,12 @@
                 }
             } catch (error) {
                 console.error("Error al guardar la emoción: ", error);
-                // No usar alert()
             }
         };
         
         const handleSendDesahogo = async () => {
             const message = desahogoTextarea.value.trim();
             if (message === '') {
-                // No usar alert()
                 console.warn('Intento de enviar mensaje vacío');
                 return;
             }
@@ -613,7 +610,7 @@
                 class: state.selectedClass,
                 message: message,
                 timestamp: new Date().toISOString(),
-                read: false // NUEVO: para estado de leído
+                read: false
             };
             
             try {
@@ -623,7 +620,6 @@
                 switchView('confirmation');
             } catch (error) {
                 console.error("Error al enviar el mensaje:", error);
-                // No usar alert()
             } finally {
                 sendDesahogoBtn.disabled = false;
                 sendDesahogoBtn.textContent = 'Enviar Mensaje Anónimo';
@@ -686,19 +682,16 @@
         };
 
         const renderDashboard = () => {
-            state.classAlert = false; // Resetea la alarma de clase
+            state.classAlert = false;
             const { emotions, desahogo } = getFilteredData();
-            // aiResultContainer.classList.add('hidden'); // ELIMINADO
-            // aiResultText.textContent = ''; // ELIMINADO
 
             renderOverallChart(emotions);
             renderTrendChart(emotions);
             renderClassCharts(emotions);
             renderContextChart(emotions);
-            renderDesahogoMessages(desahogo); // Esta ya existe
+            renderDesahogoMessages(desahogo);
             
-            // NUEVO: Lógica de Alertas
-            // Alerta de mensajes no leídos
+            // Lógica de Alertas
             const unreadMessages = desahogo.some(msg => !msg.read);
             if (unreadMessages) {
                 desahogoAlert.classList.remove('hidden');
@@ -706,7 +699,6 @@
                 desahogoAlert.classList.add('hidden');
             }
             
-            // Alerta de clases (se activa en renderClassCharts)
             if (state.classAlert) {
                 classAlert.classList.remove('hidden');
             } else {
@@ -715,26 +707,32 @@
         };
         
         const renderOverallChart = (data) => {
-            const counts = { positive: 0, negative: 0, neutral: 0 };
+            // Usar allEmotions list to initialize counts
+            const emotionCounts = allEmotions.reduce((acc, e) => ({ ...acc, [e.name]: 0 }), {});
             data.forEach(d => {
-                if (counts.hasOwnProperty(d.type)) {
-                    counts[d.type] += d.intensity;
+                if (emotionCounts.hasOwnProperty(d.emotion)) {
+                    emotionCounts[d.emotion] += d.intensity;
                 }
             });
 
             const ctx = document.getElementById('overall-chart').getContext('2d');
             if (state.charts.overall) state.charts.overall.destroy();
             
-            const chartData = [counts.positive, counts.negative, counts.neutral];
+            // Filter out emotions with 0 count to keep the chart clean
+            const filteredEmotions = allEmotions.filter(e => emotionCounts[e.name] > 0);
+            const chartLabels = filteredEmotions.map(e => e.name);
+            const chartData = filteredEmotions.map(e => emotionCounts[e.name]);
+            const chartColors = filteredEmotions.map(e => emotionHexColors[e.name] || '#6B7280'); // Fallback color
+
             const hasData = chartData.some(d => d > 0);
 
             state.charts.overall = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Positivas', 'Negativas', 'Neutrales'],
+                    labels: hasData ? chartLabels : ['Sin Datos'],
                     datasets: [{
                         data: hasData ? chartData : [1], // Mostrar [1] si no hay datos
-                        backgroundColor: hasData ? ['#4ADE80', '#F87171', '#94A3B8'] : ['#E5E7EB'],
+                        backgroundColor: hasData ? chartColors : ['#E5E7EB'],
                         borderColor: hasData ? ['#FFFFFF'] : ['#E5E7EB'],
                         borderWidth: 3
                     }]
@@ -753,69 +751,76 @@
         const renderTrendChart = (data) => {
             const dates = [...new Set(data.map(d => new Date(d.timestamp).toLocaleDateString('en-CA')))].sort();
             
-            // Inicializar contadores para CADA emoción
-            const counts = {};
-            allEmotions.forEach(emotion => {
-                counts[emotion.name] = {};
-            });
-            
-            dates.forEach(date => {
-                allEmotions.forEach(emotion => {
-                    counts[emotion.name][date] = 0;
+            // Initialize counts for *each emotion*
+            const emotionCountsByDate = allEmotions.reduce((acc, e) => {
+                acc[e.name] = {};
+                dates.forEach(date => {
+                    acc[e.name][date] = 0;
                 });
-            });
+                return acc;
+            }, {});
             
             data.forEach(d => {
                 const date = new Date(d.timestamp).toLocaleDateString('en-CA');
-                // Incrementar por nombre de emoción, no por tipo
-                if (counts[d.emotion] && counts[d.emotion].hasOwnProperty(date)) {
-                    counts[d.emotion][date] += d.intensity;
+                if (emotionCountsByDate.hasOwnProperty(d.emotion)) {
+                    emotionCountsByDate[d.emotion][date] += d.intensity;
                 }
             });
 
             const ctx = document.getElementById('trend-chart').getContext('2d');
             if (state.charts.trend) state.charts.trend.destroy();
             
-            // Crear un dataset por CADA emoción
+            // Create a dataset for each emotion
             const datasets = allEmotions.map(emotion => {
+                const emotionData = Object.values(emotionCountsByDate[emotion.name]);
                 return {
                     label: emotion.name,
-                    data: Object.values(counts[emotion.name]),
-                    borderColor: emotionColorMap[emotion.name] || '#000000',
-                    backgroundColor: emotionColorMap[emotion.name] || '#000000',
+                    data: emotionData,
+                    borderColor: emotionHexColors[emotion.name] || '#6B7280',
+                    backgroundColor: emotionHexColors[emotion.name] || '#6B7280',
                     tension: 0.1,
-                    hidden: emotion.type === 'positive' || emotion.type === 'neutral' // Ocultar no-negativas por defecto
+                    // Hide emotions with no data to reduce clutter
+                    hidden: emotionData.every(val => val === 0) 
                 };
-            }).filter(dataset => dataset.data.some(d => d > 0)); // Solo mostrar líneas con datos
+            });
 
             state.charts.trend = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })),
-                    datasets: datasets // Usar los datasets generados
+                    datasets: datasets
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
                     scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
-                    plugins: { 
-                        legend: { 
-                            position: 'right', // Mover leyenda a la derecha
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
                             labels: {
-                                boxWidth: 20
+                                // Use boxes and limit box width to prevent wrapping
+                                usePointStyle: false,
+                                boxWidth: 20,
                             }
-                        } 
-                    } 
+                        }
+                    }
                 }
             });
         };
 
         const renderClassCharts = (data) => {
+            // ESTOS ELEMENTOS AHORA EXISTEN GRACIAS AL HTML CORREGIDO
             const infantilContainer = document.getElementById('infantil-charts-container');
             const primariaContainer = document.getElementById('primaria-charts-container');
             const esoContainer = document.getElementById('eso-charts-container');
             const profesoresContainer = document.getElementById('profesores-charts-container');
             
+            // Fallback por si acaso, aunque ahora deberían existir
+            if (!infantilContainer || !primariaContainer || !esoContainer || !profesoresContainer) {
+                console.error("Faltan contenedores de etapas en el HTML.");
+                return;
+            }
+
             infantilContainer.innerHTML = '';
             primariaContainer.innerHTML = '';
             esoContainer.innerHTML = '';
@@ -826,60 +831,67 @@
             }
             state.charts.classes = {};
 
-            // Mapa de tipos de emoción para calcular la alerta
-            const emotionMap = allEmotions.reduce((acc, e) => ({...acc, [e.name]: e.type}), {});
+            // Helper map: emotion name -> type
+            const emotionTypeMap = allEmotions.reduce((acc, e) => ({ ...acc, [e.name]: e.type }), {});
 
-            // Inicializar contadores para CADA emoción en CADA clase
+            // Initialize classData to hold counts for *each emotion*
             const classData = classes.reduce((acc, cls) => {
-                acc[cls] = {};
-                allEmotions.forEach(emotion => {
-                    acc[cls][emotion.name] = 0;
-                });
+                acc[cls] = allEmotions.reduce((eAcc, e) => ({ ...eAcc, [e.name]: 0 }), {});
                 return acc;
             }, {});
             
             data.forEach(d => {
-                // Incrementar por nombre de emoción
                 if (classData[d.class] && classData[d.class].hasOwnProperty(d.emotion)) {
                     classData[d.class][d.emotion] += d.intensity;
                 }
             });
 
             const placeholder = '<p class="text-sm text-center text-slate-400">Sin datos</p>';
-            let hasDataAnywhere = false;
             
             classes.forEach(className => {
                 const emotionCounts = classData[className];
-                const total = Object.values(emotionCounts).reduce((a, b) => a + b, 0);
                 
-                if (total === 0) return; // No renderizar gráfico si no hay datos
+                // Filter out emotions with 0 count and sort by intensity
+                const filteredEmotions = allEmotions
+                    .filter(e => emotionCounts[e.name] > 0)
+                    .sort((a, b) => emotionCounts[b.name] - emotionCounts[a.name]); // Sort descending
+                    
+                if (filteredEmotions.length === 0) return; // No data for this class, skip rendering
                 
-                hasDataAnywhere = true;
-                
-                // Calcular porcentaje negativo para la alerta
-                let negativeTotal = 0;
-                Object.entries(emotionCounts).forEach(([emotionName, count]) => {
-                    if (emotionMap[emotionName] === 'negative' || emotionMap[emotionName] === 'neutral') {
-                        negativeTotal += count;
+                const chartLabels = filteredEmotions.map(e => e.name);
+                const chartData = filteredEmotions.map(e => emotionCounts[e.name]);
+                const chartColors = filteredEmotions.map(e => emotionHexColors[e.name] || '#6B7280');
+
+                // --- Recalculate Alert Logic ---
+                let totalIntensity = 0;
+                let negativeIntensity = 0;
+                filteredEmotions.forEach(e => {
+                    const intensity = emotionCounts[e.name];
+                    totalIntensity += intensity;
+                    if (emotionTypeMap[e.name] === 'negative') {
+                        negativeIntensity += intensity;
                     }
                 });
-                const negativePercent = (negativeTotal / total) * 100;
+
                 let alertClass = '';
-                
-                // NUEVO: Lógica de Alerta de Clase
-                if (negativePercent > 60 && total > 5) { // Más del 60% negativo y más de 5 registros
-                    alertClass = 'alert-border animate-pulse';
-                    state.classAlert = true; // Activa la alarma general
+                if (totalIntensity > 5) { // Only check if total is significant
+                    const negativePercent = (negativeIntensity / totalIntensity) * 100;
+                    if (negativePercent > 60) {
+                        alertClass = 'alert-border animate-pulse';
+                        state.classAlert = true; // Activa la alarma general
+                    }
                 }
+                // --- End Alert Logic ---
 
                 const card = document.createElement('div');
                 card.className = `bg-slate-50 p-4 rounded-lg border border-slate-200 ${alertClass}`;
+                // Adjust height based on number of emotions
+                const chartHeight = Math.max(100, filteredEmotions.length * 25); // 25px per bar
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <h4 class="font-semibold text-slate-600">${className}</h4>
-                        <!-- BOTÓN IA ELIMINADO -->
                     </div>
-                    <canvas></canvas>
+                    <canvas style="height: ${chartHeight}px;"></canvas>
                 `;
                 
                 // --- NUEVA LÓGICA DE CLASIFICACIÓN (4 contenedores) ---
@@ -899,29 +911,33 @@
                     const ctx = card.querySelector('canvas').getContext('2d');
                     
                     state.charts.classes[className] = new Chart(ctx, {
-                        type: 'bar', // Cambiado a 'bar'
+                        type: 'bar', // CHANGED to bar
                         data: {
-                            labels: allEmotions.map(e => e.name), // Etiquetas son nombres de emociones
+                            labels: chartLabels,
                             datasets: [{ 
-                                label: 'Intensidad Total',
-                                data: allEmotions.map(e => emotionCounts[e.name]), // Datos por emoción
-                                backgroundColor: allEmotions.map(e => emotionColorMap[e.name] || '#000000') // Colores por emoción
+                                label: 'Intensidad',
+                                data: chartData, 
+                                backgroundColor: chartColors,
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.9
                             }]
                         },
                         options: { 
-                            responsive: true, 
+                            indexAxis: 'y', // CHANGED to horizontal
+                            responsive: true,
+                            maintainAspectRatio: false, // Important for custom height
                             plugins: { 
-                                legend: { display: false } // Ocultar leyenda para gráfico de barras
+                                legend: { 
+                                    display: false // No legend needed for single-dataset bar
+                                } 
                             },
                             scales: {
-                                y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                                x: { // Configuración del eje X para etiquetas largas
-                                    ticks: {
-                                        autoSkip: false,
-                                        maxRotation: 90,
-                                        minRotation: 90,
-                                        font: { size: 10 }
-                                    }
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1 }
+                                },
+                                y: {
+                                    ticks: { font: { size: 10 } }
                                 }
                             }
                         }
@@ -939,12 +955,12 @@
         };
         
         const renderContextChart = (data) => {
-            const emotionMap = allEmotions.reduce((acc, e) => ({...acc, [e.name]: e.type}), {}); // Usar allEmotions
-            const negativeData = data.filter(d => emotionMap[d.emotion] === 'negative' || emotionMap[d.emotion] === 'neutral');
-            
             const contextCounts = allContextNames.reduce((acc, c) => ({ ...acc, [c]: 0 }), {});
-            negativeData.forEach(d => {
-                if (contextCounts.hasOwnProperty(d.context)) { contextCounts[d.context]++; }
+            // Use all data, not just negativeData
+            data.forEach(d => {
+                if (contextCounts.hasOwnProperty(d.context)) { 
+                    contextCounts[d.context]++; 
+                }
             });
 
             const ctx = document.getElementById('context-chart').getContext('2d');
@@ -959,8 +975,6 @@
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
         };
-        
-        // --- FIN BLOQUE RESTAURADO ---
         
         // NUEVA: Renderiza los mensajes del buzón
         const renderDesahogoMessages = (data) => {
@@ -1006,8 +1020,6 @@
             }
         };
 
-        // const handleAiAnalysis = async (scope = 'general', className = null) => { ... } // FUNCIÓN ELIMINADA
-        
         const exportToPdf = () => {
             const dashboardContent = document.getElementById('dashboard-content');
             const { jsPDF } = window.jspdf;
@@ -1069,22 +1081,12 @@
         document.getElementById('next-student-btn').addEventListener('click', () => switchView('emotionSelection'));
         document.getElementById('finish-session-btn').addEventListener('click', () => { state.selectedClass = null; switchView('classSelection'); });
         [dateStartFilter, dateEndFilter].forEach(el => el.addEventListener('change', renderDashboard));
-        // aiAnalysisBtn.addEventListener('click', () => handleAiAnalysis('general')); // ELIMINADO
         document.getElementById('export-pdf-btn').addEventListener('click', exportToPdf);
         document.getElementById('reset-data-btn').addEventListener('click', () => confirmationModal.classList.remove('hidden'));
         document.getElementById('cancel-reset-btn').addEventListener('click', () => confirmationModal.classList.add('hidden'));
         confirmResetBtn.addEventListener('click', resetDatabase);
         views.intensitySelection.querySelectorAll('.intensity-btn').forEach(btn => btn.addEventListener('click', (e) => handleIntensitySelection(parseInt(e.target.dataset.intensity))));
-        
-        // Listeners para botones de IA en clases (ELIMINADO)
-        /*
-        document.getElementById('etapas-container').addEventListener('click', e => {
-            if (e.target.classList.contains('class-ai-btn')) {
-                handleAiAnalysis('class', e.target.dataset.class);
-            }
-        });
-        */
-        
+                
         document.getElementById('back-to-emotion-selection').addEventListener('click', () => switchView('emotionSelection'));
 
         // NUEVOS Listeners para el buzón
@@ -1102,7 +1104,6 @@
 
         // --- INICIALIZACIÓN ---
         initClassSelection();
-        // initEmotionSelection(); // Se llama dentro de handleClassSelection
         initAdminLogin();
         switchView('classSelection');
     });
